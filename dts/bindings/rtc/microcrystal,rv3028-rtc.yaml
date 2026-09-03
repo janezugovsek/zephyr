@@ -8,6 +8,18 @@ compatible: "microcrystal,rv3028-rtc"
 
 include: rtc-device.yaml
 
+properties:
+  update-periodic-time:
+    type: string
+    enum:
+      - seconds
+      - minutes
+    default: seconds
+    description: |
+      Periodic time update interrupt rate. The RV3028 can generate an update
+      interrupt at either the one-second or one-minute update time. If omitted,
+      the driver uses seconds.
+
 examples:
   - |
     /* Example node for an RV3028 RTC on the i2c0 bus. */
@@ -24,6 +36,7 @@ examples:
 
         rv3028_rtc: rtc {
           compatible = "microcrystal,rv3028-rtc";
+          update-periodic-time = "minutes";
           status = "okay";
         };
       };

@@ -48,6 +48,7 @@ LOG_MODULE_REGISTER(rtc_rv3028, CONFIG_RTC_LOG_LEVEL);
 
 struct rv3028_config {
 	const struct device *mfd;
+	const bool periodic_minutes;
 };
 
 struct rv3028_data {
@@ -497,6 +498,15 @@ static int rv3028_init(const struct device *dev)
 		return -ENODEV;
 	}
 
+	#ifdef CONFIG_RTC_UPDATE
+	if (config->periodic_minutes) {
+		err = mfd_rv3028_update_reg8(config->mfd, RV3028_REG_CONTROL1, RV3028_CONTROL1_USEL, RV3028_CONTROL1_USEL);
+		if (err) {
+			return -ENODEV;
+		}
+	}
+	#endif /* CONFIG_RTC_UPDATE */
+
 	return 0;
 }
 
@@ -522,6 +532,8 @@ static DEVICE_API(rtc, rv3028_driver_api) = {
 #define RV3028_INIT(inst)                                                                          \
 	static const struct rv3028_config rv3028_config_##inst = {                                 \
 		.mfd = DEVICE_DT_GET(DT_INST_PARENT(inst)),                                        \
+		.periodic_minutes = DT_INST_ENUM_IDX_OR(inst, update_periodic_time,                \
+							RV3028_PERIODIC_TIME_SECONDS),             \
 	};                                                                                         \
                                                                                                    \
 	static struct rv3028_data rv3028_data_##inst;                                              \
